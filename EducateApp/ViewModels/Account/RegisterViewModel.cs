@@ -2,14 +2,12 @@
 
 namespace EducateApp.ViewModels
 {
-    // ViewModel - модель для представления,
-    // т.е. какие свойства (поля) "модель" нужно заполнить на определенной странице Html "представление"
-    // на странице с регистрацией помимо E-mail и пароля нужно внести информацию о преподавателе - его ФИО
+   
     public class RegisterViewModel
     {
         [Required(ErrorMessage = "Введите E-mail")]
         [Display(Name = "Email")]
-        [DataType(DataType.EmailAddress)]   // тип элемента управления на странице
+        [DataType(DataType.EmailAddress)]   
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Введите фамилию")]
@@ -26,12 +24,12 @@ namespace EducateApp.ViewModels
 
         [Required(ErrorMessage = "Введите пароль")]
         [Display(Name = "Пароль")]
-        [DataType(DataType.Password)]   // тип элемента управления на странице
+        [DataType(DataType.Password)]   
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Повторите ввод пароля")]
-        [Compare("Password", ErrorMessage = "Пароли не совпадают")]   // механизм, который сверяет текущее значение PasswordConfirm, с указанным Password
-        [DataType(DataType.Password)]   // тип элемента управления на странице
+        [Compare("Password", ErrorMessage = "Пароли не совпадают")]  
+        [DataType(DataType.Password)]   
         [Display(Name = "Подтвердить пароль")]
         public string PasswordConfirm { get; set; }
     }

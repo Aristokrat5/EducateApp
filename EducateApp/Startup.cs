@@ -48,7 +48,7 @@ namespace EducateApp
 
             app.UseRouting();
 
-            app.UseAuthentication();    // подключение аутентификации обязательно перед UseAuthorization()
+            app.UseAuthentication();   
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -19,21 +19,16 @@ namespace EducateApp.Controllers
         }
 
         [HttpGet]
-        // метод срабатывает при открытии страницы регистрации, никакие значения пока передавать не нужно
-        // вы просто открыли страницу с регистрацией и не успели еще ничего ввести
         public IActionResult Register()
         {
             return View();
         }
 
         [HttpPost]
-        // теперь вы ввели значения и нажали кнопку "Зарегистрироваться", например
-        // методом Post данные передаются через модель для представления RegisterViewModel
         public async Task<IActionResult> Register(RegisterViewModel model)   
         {
             if (ModelState.IsValid)
-            {
-                // создание экземпляра user класса User и установка его свойствам значениям из модели
+            {  
                 User user = new User { 
                     LastName=model.LastName, 
                     FirstName=model.FirstName, 
@@ -41,12 +36,9 @@ namespace EducateApp.Controllers
                     Email = model.Email, 
                     UserName = model.Email 
                 };
-
-                // добавляем пользователя
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // установка куки
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index", "Home");
                 }
@@ -58,7 +50,7 @@ namespace EducateApp.Controllers
                     }
                 }
             }
-            return View(model);   // возвращение модели в представление
+            return View(model);  
         }
 
         [HttpGet]
@@ -77,7 +69,6 @@ namespace EducateApp.Controllers
                     await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
-                    // проверяем, принадлежит ли URL приложению
                     if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                     {
                         return Redirect(model.ReturnUrl);
@@ -99,7 +90,6 @@ namespace EducateApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // удаляем аутентификационные куки
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
