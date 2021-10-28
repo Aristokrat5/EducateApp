@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using EducateApp.Models.Validators;
 
 namespace EducateApp
 {
@@ -23,6 +24,11 @@ namespace EducateApp
         {
             services.AddDbContext<AppCtx>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<IPasswordValidator<User>, CustomPasswordValidator>(
+               serv => new CustomPasswordValidator(8));
+
+            services.AddTransient<IUserValidator<User>, CustomUserValidator>();
 
             services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppCtx>();
