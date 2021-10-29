@@ -11,11 +11,15 @@ namespace EducateApp.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public AccountController(
+           UserManager<User> userManager,
+           SignInManager<User> signInManager,
+           RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
         [HttpGet]
@@ -40,6 +44,7 @@ namespace EducateApp.Controllers
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, false);
+                    await _userManager.AddToRoleAsync(user, "registeredUser");
                     return RedirectToAction("Index", "Home");
                 }
                 else
