@@ -11,7 +11,7 @@ namespace EducateApp.Models
         public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
 
-            string adminEmail = "shitik.shitik@mail.ru";
+            string adminEmail = "shitik1.shitik@mail.ru";
             string password = "123456Aa";
 
             if (await roleManager.FindByNameAsync("admin") == null)

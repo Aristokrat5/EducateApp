@@ -4,6 +4,7 @@ using EducateApp.ViewModels.Account;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EducateApp.Controllers
 {
@@ -43,9 +44,16 @@ namespace EducateApp.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, false);
-                    await _userManager.AddToRoleAsync(user, "registeredUser");
-                    return RedirectToAction("Index", "Home");
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var callbackUrl = Url.Action(
+                        "ConfirmEmail",
+                        "Account",
+                        new { userId = user.Id, code = code },
+                        protocol: HttpContext.Request.Scheme);
+                    EmailService emailService = new EmailService();
+                    await emailService.SendEmailAsync(model.Email, "Confirm your account",
+                        $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
+                    return View("RegisterConfirmation");
                 }
                 else
                 {
@@ -59,10 +67,32 @@ namespace EducateApp.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return View("Error");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View("Error");
+            }
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+            if (result.Succeeded)
+                return RedirectToAction("Index", "Home");
+            else
+                return View("Error");
+        }
+
+
+        [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
-            return View(new LoginViewModel { ReturnUrl = returnUrl });
+            return View(new LoginViewModel { ReturnUrl = returnUrl });  
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -70,10 +100,22 @@ namespace EducateApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                var user = await _userManager.FindByNameAsync(model.Email);
+
+                if (user != null)
+                {
+                    if (!await _userManager.IsEmailConfirmedAsync(user))
+                    {
+                        ModelState.AddModelError(string.Empty, "Вы не подтвердили свой email");
+                        return View(model);
+                    }
+                }
+
                 var result =
                     await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(user, "registeredUser");
                     if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                     {
                         return Redirect(model.ReturnUrl);
