@@ -37,7 +37,6 @@ namespace EducateApp.Controllers
                 .Where(f => f.IdUser == user.Id)     // устанавливается условие с выбором записей форм обучения текущего пользователя по его Id
                 .OrderBy(f => f.FormOfEdu);          // сортируем все записи по имени форм обучения
 
-            // возвращаем в представление полученный список записей
             return View(await appCtx.ToListAsync());
         }
 
