@@ -1,10 +1,9 @@
 ﻿using EducateApp.Models;
 using EducateApp.Models.Data;
-using EducateApp.ViewModels.FormsOfStudy;
+using EducateApp.ViewModels.Disciplines;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,12 +11,12 @@ using System.Threading.Tasks;
 namespace EducateApp.Controllers
 {
     [Authorize(Roles = "admin, registeredUser")]
-    public class FormsOfStudyController : Controller
+    public class DisciplinesController : Controller
     {
         private readonly AppCtx _context;
         private readonly UserManager<User> _userManager;
 
-        public FormsOfStudyController(
+        public DisciplinesController(
             AppCtx context,
             UserManager<User> user)
         {
@@ -25,56 +24,59 @@ namespace EducateApp.Controllers
             _userManager = user;
         }
 
-        // GET: FormsOfStudy
+        // GET: Disciplines
         public async Task<IActionResult> Index()
         {
             // находим информацию о пользователе, который вошел в систему по его имени
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            // через контекст данных получаем доступ к таблице базы данных FormsOfStudy
-            var appCtx = _context.FormsOfStudy
-                .Include(f => f.User)                // и связываем с таблицей пользователи через класс User
-                .Where(f => f.IdUser == user.Id)     // устанавливается условие с выбором записей форм обучения текущего пользователя по его Id
-                .OrderBy(f => f.FormOfEdu);          // сортируем все записи по имени форм обучения
-
+            var appCtx = _context.Disciplines
+ .Include(d => d.User)
+ .Where(w => w.IdUser == user.Id)
+ .OrderBy(o => o.Name);
             return View(await appCtx.ToListAsync());
         }
 
-        // GET: FormsOfStudy/Create
+
+        // GET: Disciplines/Create
         public IActionResult Create()
         {
             return View();
         }
 
+        // POST: Disciplines/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateFormOfStudyViewModel model)
+        public async Task<IActionResult> Create(CreateDisciplinesViewModel model)
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            if (_context.FormsOfStudy
-                .Where(f => f.IdUser == user.Id &&
-                    f.FormOfEdu == model.FormOfEdu).FirstOrDefault() != null)
+            if (_context.Disciplines.Where(f => f.IdUser == user.Id &&
+                    f.Name == model.Name).FirstOrDefault() != null)
             {
-                ModelState.AddModelError("", "Введеная форма обучения уже существует");
+                ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
             }
 
             if (ModelState.IsValid)
             {
-                FormOfStudy formOfStudy = new()
+                Disciplines disciplines = new()
                 {
-                    FormOfEdu = model.FormOfEdu,
+                    IndexProfModule = model.IndexProfModule,
+                    ProfModule = model.ProfModule,
+                    Index = model.Index,
+                    Name = model.Name,
+                    ShortName = model.ShortName,
                     IdUser = user.Id
                 };
 
-                _context.Add(formOfStudy);
+                _context.Add(disciplines);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
         }
 
-        // GET: FormsOfStudy/Edit/5
+        // GET: Disciplines/Edit/5
         public async Task<IActionResult> Edit(short? id)
         {
             if (id == null)
@@ -82,53 +84,58 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
-            var formOfStudy = await _context.FormsOfStudy.FindAsync(id);
-            if (formOfStudy == null)
+            var disciplines = await _context.Disciplines.FindAsync(id);
+            if (disciplines == null)
             {
                 return NotFound();
             }
 
-            EditFormOfStudyViewModel model = new()
+            EditDisciplinesViewModel model = new()
             {
-                Id = formOfStudy.Id,
-                FormOfEdu = formOfStudy.FormOfEdu,
-                IdUser = formOfStudy.IdUser
+                Id = disciplines.Id,
+                IndexProfModule = disciplines.IndexProfModule,
+                ProfModule = disciplines.ProfModule,
+                Index = disciplines.Index,
+                Name = disciplines.Name,
+                ShortName = disciplines.ShortName,
+                IdUser = disciplines.IdUser
             };
+
 
             return View(model);
         }
 
+        // POST: Disciplines/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(short id, EditFormOfStudyViewModel model)
+        public async Task<IActionResult> Edit(short id, EditDisciplinesViewModel model)
         {
-            FormOfStudy formOfStudy = await _context.FormsOfStudy.FindAsync(id);
+            Disciplines disciplines = await _context.Disciplines.FindAsync(id);
 
-            if (id != formOfStudy.Id)
+            if (id != disciplines.Id)
             {
                 return NotFound();
             }
 
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            if (_context.FormsOfStudy
-            .Where(f => f.IdUser == user.Id &&
-                    f.FormOfEdu == model.FormOfEdu).FirstOrDefault() != null)
+            if (_context.Disciplines
+                .Where(f => f.IdUser == user.Id &&
+                    f.Name == model.Name).FirstOrDefault() != null)
             {
-                ModelState.AddModelError("", "Введеная форма обучения уже существует");
+                ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    formOfStudy.FormOfEdu = model.FormOfEdu;
-                    _context.Update(formOfStudy);
+                    _context.Update(disciplines);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!FormOfStudyExists(formOfStudy.Id))
+                    if (!DisciplinesExists(disciplines.Id))
                     {
                         return NotFound();
                     }
@@ -142,7 +149,7 @@ namespace EducateApp.Controllers
             return View(model);
         }
 
-        // GET: FormsOfStudy/Delete/5
+        // GET: Disciplines/Delete/5
         public async Task<IActionResult> Delete(short? id)
         {
             if (id == null)
@@ -150,29 +157,29 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
-            var formOfStudy = await _context.FormsOfStudy
-                .Include(f => f.User)
+            var disciplines = await _context.Disciplines
+                .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (formOfStudy == null)
+            if (disciplines == null)
             {
                 return NotFound();
             }
 
-            return View(formOfStudy);
+            return View(disciplines);
         }
 
-        // POST: FormsOfStudy/Delete/5
+        // POST: Disciplines/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(short id)
         {
-            var formOfStudy = await _context.FormsOfStudy.FindAsync(id);
-            _context.FormsOfStudy.Remove(formOfStudy);
+            var disciplines = await _context.Disciplines.FindAsync(id);
+            _context.Disciplines.Remove(disciplines);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: FormsOfStudy/Details/5
+        // GET: Disciplines/Details/5
         public async Task<IActionResult> Details(short? id)
         {
             if (id == null)
@@ -180,21 +187,20 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
-            var formOfStudy = await _context.FormsOfStudy
-                .Include(f => f.User)
+            var disciplines = await _context.Disciplines
+                .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (formOfStudy == null)
+            if (disciplines == null)
             {
                 return NotFound();
             }
 
-            return View(formOfStudy);
+            return View(disciplines);
         }
 
-        private bool FormOfStudyExists(short id)
+        private bool DisciplinesExists(short id)
         {
-            return _context.FormsOfStudy.Any(e => e.Id == id);
+            return _context.Disciplines.Any(e => e.Id == id);
         }
     }
 }

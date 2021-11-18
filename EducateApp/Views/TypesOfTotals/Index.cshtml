@@ -1,51 +1,37 @@
-﻿@model IEnumerable<EducateApp.Models.Data.Specialty>
+﻿@model IEnumerable<EducateApp.Models.Data.TypesOfTotals>
 
 @{
-    ViewData["Title"] = "Специальности";
+    ViewData["Title"] = "Виды промежуточной аттестации";
 }
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Главная</a></li>
-    <li class="breadcrumb-item active">Специальности</li>
+    <li class="breadcrumb-item active">Виды промежуточной аттестации</li>
     </ol>
 </nav>
-<h2>Специальности</h2>
+<h2>Виды промежуточной аттестации</h2>
 
 <h6>
     <a class="btn text-dark" asp-action="Create">
-        <i class="far fa-plus-square"></i> Добавить специальность
+        <i class="far fa-plus-square"></i> Добавить вид промежуточной аттестации
     </a>
 </h6>
-
-<div class="table-responsive">
- <table class="table table-bordered text-nowrap table-sm">
- <thead class="thead-light">
-<tr>
-    <th>
-        @Html.DisplayNameFor(model => model.Code)
-    </th>
-    <th>
-        @Html.DisplayNameFor(model => model.Name)
-    </th>
-    <th>
-        @Html.DisplayNameFor(model => model.FormOfStudy.FormOfEdu)
-    </th>
-    <th></th>
-</tr>
-        </thead>
+<table class="table">
+<thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.CertificateName)
+        </th>
+        <th></th>
+    </tr>
+</thead>
 <tbody>
     @foreach (var item in Model)
     {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FormOfStudy.FormOfEdu)
+                @Html.DisplayFor(modelItem => item.CertificateName)
             </td>
             <td>
                 <a class="btn text-dark" asp-action="Details" asp-route-id="@item.Id" title="Посмотреть подробнее">
@@ -61,5 +47,4 @@
         </tr>
     }
 </tbody>
-    </table>
-</div>
+</table>

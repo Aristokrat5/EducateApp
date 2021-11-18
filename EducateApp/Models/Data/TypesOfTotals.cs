@@ -1,26 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EducateApp.Models.Data
 {
-    public class FormOfStudy
+    public class TypesOfTotals
     {
+
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Display(Name = "ИД")]
         public short Id { get; set; }
 
-        [Required(ErrorMessage = "Введите название формы обучения")]
-        [Display(Name = "Форма обучения")]
-        public string FormOfEdu { get; set; }
+        [Required(ErrorMessage = "Введите название аттестации")]
+        [Display(Name = "Название аттестации")]
+        public string CertificateName { get; set; }
 
         [Required]
         public string IdUser { get; set; }
 
         [ForeignKey("IdUser")]
+        [Display(Name = "Пользователь")]
         public User User { get; set; }
-
-        [Required]
-        public ICollection<Specialty> Specialties { get; set; }
     }
 }
