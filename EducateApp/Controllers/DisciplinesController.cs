@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
+using System;
+using System.IO;
 
 namespace EducateApp.Controllers
 {
@@ -195,8 +198,88 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
-            return View(disciplines);
+            return PartialView(disciplines);
         }
+
+
+
+        public async Task<FileResult> DownloadPattern()
+        {
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            // выбираем из базы данных все специальности текущего пользователя
+            var appCtx = _context.Disciplines
+                .Include(d => d.User)
+                 .Where(w => w.IdUser == user.Id)
+                 .OrderBy(o => o.Name);
+
+            int i = 1;      // счетчик
+
+            IXLRange rngBorder;     // объект для работы с диапазонами в Excel (выделение групп ячеек)
+
+            // создание книги Excel
+            using (XLWorkbook workbook = new(XLEventTracking.Disabled))
+            {
+                // для каждой специальности 
+                foreach (Disciplines disciplines in appCtx)
+                {
+                    // добавить лист в книгу Excel
+                    // с названием 3 символа формы обучения и кода специальности
+                    IXLWorksheet worksheet = workbook.Worksheets
+                        .Add($"{disciplines.Id}");
+
+                    // в первой строке текущего листа указываем: 
+                    // в ячейку A1 значение "Форма обучения"
+                    worksheet.Cell("A" + i).Value = "Индекс проф. модуля";
+                    // в ячейку B1 значение - название формы обучения текущей специальности
+                    worksheet.Cell("B" + i).Value = disciplines.IndexProfModule;
+                    // увеличение счетчика на единицу
+                    i++;
+
+                    // во второй строке
+                    worksheet.Cell("A" + i).Value = "Проф. Модуль";
+                    worksheet.Cell("B" + i).Value = $"'{disciplines.ProfModule}";
+                    i++;
+                    worksheet.Cell("A" + i).Value = "Индекс";
+                    worksheet.Cell("B" + i).Value = disciplines.Index;
+
+                    i++;
+                    worksheet.Cell("A" + i).Value = "Название";
+                    worksheet.Cell("B" + i).Value = disciplines.Name;
+
+                    i++;
+                    worksheet.Cell("A" + i).Value = "Сокращенное название";
+                    worksheet.Cell("B" + i).Value = disciplines.ShortName;
+
+                    // устанавливаем внешние границы для диапазона A4:F4
+                    rngBorder = worksheet.Range("A1:B5");       // создание диапазона (выделения ячеек)
+                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;       // для диапазона задаем внешнюю границу
+
+                    // на листе для столбцов задаем значение ширины по содержимому
+                    worksheet.Columns().AdjustToContents();
+
+                    // счетчик "обнуляем"
+                    i = 1;
+                }
+
+                // создаем стрим
+                using (MemoryStream stream = new())
+                {
+                    // помещаем в стрим созданную книгу
+                    workbook.SaveAs(stream);
+                    stream.Flush();
+
+                    // возвращаем файл определенного типа
+                    return new FileContentResult(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    {
+                        FileDownloadName = $"Disciplines_{DateTime.UtcNow.ToShortDateString()}.xlsx"     //в названии файла указываем таблицу и текущую дату
+                    };
+                }
+            }
+        }
+
+
 
         private bool DisciplinesExists(short id)
         {
