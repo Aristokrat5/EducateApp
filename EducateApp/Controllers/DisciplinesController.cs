@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ClosedXML.Excel;
 using System;
 using System.IO;
+using EducateApp.ViewModels;
 
 namespace EducateApp.Controllers
 {
@@ -28,16 +29,92 @@ namespace EducateApp.Controllers
         }
 
         // GET: Disciplines
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string indexProfModule, string profModule, string index, string name, string shortName,
+            int page = 1,
+            DisciplinesSortState sortOrder = DisciplinesSortState.IndexProfModuleAsc)
         {
             // находим информацию о пользователе, который вошел в систему по его имени
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var appCtx = _context.Disciplines
- .Include(d => d.User)
- .Where(w => w.IdUser == user.Id)
- .OrderBy(o => o.Name);
-            return View(await appCtx.ToListAsync());
+            int pageSize = 15;
+
+            //фильтрация
+            IQueryable<Disciplines> disciplines = _context.Disciplines
+             .Include(d => d.User)
+             .Where(w => w.IdUser == user.Id);    // в формах обучения есть поле с внешним ключом пользователя
+
+
+            if (!String.IsNullOrEmpty(indexProfModule))
+            {
+                disciplines = disciplines.Where(p => p.IndexProfModule.Contains(indexProfModule));
+            }
+            if (!String.IsNullOrEmpty(profModule))
+            {
+                disciplines = disciplines.Where(p => p.ProfModule.Contains(profModule));
+            }
+            if (!String.IsNullOrEmpty(index))
+            {
+                disciplines = disciplines.Where(p => p.Index.Contains(index));
+            }
+            if (!String.IsNullOrEmpty(name))
+            {
+                disciplines = disciplines.Where(p => p.Name.Contains(name));
+            }
+            if (!String.IsNullOrEmpty(shortName))
+            {
+                disciplines = disciplines.Where(p => p.ShortName.Contains(shortName));
+            }
+            
+
+
+            // сортировка
+            switch (sortOrder)
+            {
+                case DisciplinesSortState.IndexProfModuleDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.IndexProfModule);
+                    break;
+                case DisciplinesSortState.ProfModuleAsc:
+                    disciplines = disciplines.OrderBy(s => s.ProfModule);
+                    break;
+                case DisciplinesSortState.ProfModuleDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.ProfModule);
+                    break;
+                case DisciplinesSortState.IndexAsc:
+                    disciplines = disciplines.OrderBy(s => s.Index);
+                    break;
+                case DisciplinesSortState.IndexDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.Index);
+                    break;
+                case DisciplinesSortState.NameAsc:
+                    disciplines = disciplines.OrderByDescending(s => s.Name);
+                    break;
+                case DisciplinesSortState.NameDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.Name);
+                    break;
+                case DisciplinesSortState.ShortNameAsc:
+                    disciplines = disciplines.OrderByDescending(s => s.ShortName);
+                    break;
+                case DisciplinesSortState.ShortNameDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.ShortName);
+                    break;
+                default:
+                    disciplines = disciplines.OrderBy(s => s.IndexProfModule);
+                    break;
+            }
+
+            // пагинация
+            var count = await disciplines.CountAsync();
+            var items = await disciplines.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            // формируем модель представления
+            IndexDisciplinesViewModel viewModel = new()
+            {
+                PageViewModel = new(count, page, pageSize),
+                SortDisciplinesViewModel = new(sortOrder),
+                FilterDisciplinesViewModel = new(indexProfModule, profModule, index, name, shortName),
+                Disciplines = items
+            };
+            return View(viewModel);
         }
 
 
