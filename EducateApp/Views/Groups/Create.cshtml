@@ -28,9 +28,9 @@
             <div class="form-group">
                 <label asp-for="IdFormOfStudy" class="control-label"></label>
                 @Html.DropDownListFor(m => m.IdFormOfStudy,@* для какого свойства модели*@
-ViewBag.FormsOfStudy as SelectList,          /* получаем переданные данные через ViewBag*/
-new { id = "formOfStudy", @class = "form-control" })     @* указываем дополнительные атрибуты для элемента*@
-</div>
+                ViewBag.FormsOfStudy as SelectList,          /* получаем переданные данные через ViewBag*/
+                new { id = "formOfStudy", @class = "form-control" })     @* указываем дополнительные атрибуты для элемента*@
+            </div>
 <div class="form-group">
     <label asp-for="IdSpecialty" class="control-label"></label>
     @Html.DropDownListFor(m => m.IdSpecialty,

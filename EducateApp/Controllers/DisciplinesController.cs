@@ -36,7 +36,7 @@ namespace EducateApp.Controllers
             // находим информацию о пользователе, который вошел в систему по его имени
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            int pageSize = 15;
+            int pageSize = 3;
 
             //фильтрация
             IQueryable<Disciplines> disciplines = _context.Disciplines
@@ -132,6 +132,10 @@ namespace EducateApp.Controllers
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
             if (_context.Disciplines.Where(f => f.IdUser == user.Id &&
+                    f.IndexProfModule == model.IndexProfModule &&
+                    f.ProfModule == model.ProfModule &&
+                    f.Index == model.Index &&
+                    f.ShortName == model.ShortName &&
                     f.Name == model.Name).FirstOrDefault() != null)
             {
                 ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
@@ -201,6 +205,10 @@ namespace EducateApp.Controllers
 
             if (_context.Disciplines
                 .Where(f => f.IdUser == user.Id &&
+                    f.IndexProfModule == model.IndexProfModule &&
+                    f.ProfModule == model.ProfModule &&
+                    f.Index == model.Index &&
+                    f.ShortName == model.ShortName &&
                     f.Name == model.Name).FirstOrDefault() != null)
             {
                 ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
@@ -210,6 +218,12 @@ namespace EducateApp.Controllers
             {
                 try
                 {
+                    disciplines.IndexProfModule = model.IndexProfModule;
+                    disciplines.ProfModule = model.ProfModule;
+                    disciplines.Index = model.Index;
+                    disciplines.Name = model.Name;
+                    disciplines.ShortName = model.ShortName;
+                    disciplines.IdUser = user.Id;
                     _context.Update(disciplines);
                     await _context.SaveChangesAsync();
                 }
@@ -303,7 +317,7 @@ namespace EducateApp.Controllers
                     // добавить лист в книгу Excel
                     // с названием 3 символа формы обучения и кода специальности
                     IXLWorksheet worksheet = workbook.Worksheets
-                        .Add($"{disciplines.Id}");
+                        .Add($"{disciplines.Index}");
 
                     // в первой строке текущего листа указываем: 
                     // в ячейку A1 значение "Форма обучения"

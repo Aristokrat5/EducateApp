@@ -36,6 +36,7 @@
                         </li>
                     </ul>
                 </div>
+            </div>
                 <div class="p-2">
                     <form class="form-inline" asp-action="Index" method="get">
                         <div class="form-actions no-color">
@@ -46,23 +47,21 @@
                                 <input type="text" name="Name" placeholder="Дисциплина" value="@Model.FilterDisciplinesViewModel.SelectedName" class="form-control" />
                                 <input type="text" name="ShortName" placeholder="Короткое название" value="@Model.FilterDisciplinesViewModel.SelectedShortName" class="form-control" />
 
-
-
                                 <input type="submit" value="Поиск" class="btn btn-outline-success" /> |
                                 <a class="=btn text-dark" asp-action="Index"><i class="fas fa-eraser"></i></a>
                             </p>
                         </div>
                     </form>
                 </div>
-            </div>
         </ul>
     </div>
 </div>
-<table class="table">
-    <thead>
+<div class="table-responsive">
+<table class="table table-bordered text-nowrap table-sm" >
+    <thead class="thead-light">
         <tr>
             <th>
-                <a asp-action="IndexProfModule"
+                <a asp-action="Index"
                    asp-route-sortOrder="@(Model.SortDisciplinesViewModel.IndexProfModuleSort)"
                    asp-route-code="@(Model.FilterDisciplinesViewModel.SelectedIndexProfModule)"
                    asp-route-name="@(Model.FilterDisciplinesViewModel.SelectedProfModule)"
@@ -72,7 +71,7 @@
 
             </th>
             <th>
-                <a asp-action="ProfModule"
+                <a asp-action="Index"
                    asp-route-sortOrder="@(Model.SortDisciplinesViewModel.ProfModuleSort)"
                    asp-route-code="@(Model.FilterDisciplinesViewModel.SelectedIndexProfModule)"
                    asp-route-name="@(Model.FilterDisciplinesViewModel.SelectedProfModule)"
@@ -90,7 +89,7 @@
                    asp-route-name3="@(Model.FilterDisciplinesViewModel.SelectedShortName)">Индекс</a>
             </th>
             <th>
-                <a asp-action="Name"
+                <a asp-action="Index"
                    asp-route-sortOrder="@(Model.SortDisciplinesViewModel.NameSort)"
                    asp-route-code="@(Model.FilterDisciplinesViewModel.SelectedIndexProfModule)"
                    asp-route-name="@(Model.FilterDisciplinesViewModel.SelectedProfModule)"
@@ -99,7 +98,7 @@
                    asp-route-name3="@(Model.FilterDisciplinesViewModel.SelectedShortName)">Дисциплина</a>
             </th>
             <th>
-                <a asp-action="ShortName"
+                <a asp-action="Index"
                    asp-route-sortOrder="@(Model.SortDisciplinesViewModel.ShortNameSort)"
                    asp-route-code="@(Model.FilterDisciplinesViewModel.SelectedIndexProfModule)"
                    asp-route-name="@(Model.FilterDisciplinesViewModel.SelectedProfModule)"
@@ -144,6 +143,7 @@
         }
     </tbody>
 </table>
+    </div>
 
 @section scripts
 {

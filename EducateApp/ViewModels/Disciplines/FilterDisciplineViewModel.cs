@@ -14,7 +14,7 @@ namespace EducateApp.ViewModels.Disciplines
 
 
 
-        public FilterDisciplineViewModel(string indexProfModule, string name, string profModule, string index, string shortName)
+        public FilterDisciplineViewModel(string indexProfModule, string profModule, string index, string name, string shortName)
         {
             SelectedIndexProfModule = indexProfModule;
             SelectedProfModule = profModule;
